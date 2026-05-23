@@ -30,6 +30,7 @@
   "components.Discover.CleanupSlider.snoozeFailed": "Pausieren fehlgeschlagen.",
   "components.Discover.CleanupSlider.deleteSuccess": "Medium gelöscht.",
   "components.Discover.CleanupSlider.deleteFailed": "Löschen fehlgeschlagen.",
+  "components.Discover.CleanupSlider.deletemedia": "Löschen",
   "components.Discover.CleanupSlider.deleteConfirm": "Löschen?",
   "components.Discover.CleanupSlider.canWeDelete": "Noch am Schauen?",
   "components.Discover.CleanupSlider.yesDelete": "Fertig",

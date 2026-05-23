@@ -26,6 +26,7 @@ const messages = defineMessages('components.Discover.CleanupSlider', {
   snoozeFailed: 'Failed to snooze.',
   deleteSuccess: 'Media deleted.',
   deleteFailed: 'Failed to delete media.',
+  deletemedia: 'Delete',
   deleteConfirm: 'Delete?',
   canWeDelete: 'Still watching?',
   yesDelete: 'Done',
@@ -274,7 +275,7 @@ const AdminCleanupCard = ({
             className="w-full !py-1 !text-xs"
           >
             <TrashIcon className="mr-1 h-3.5 w-3.5" />
-            <span>{intl.formatMessage(messages.yesDelete)}</span>
+            <span>{intl.formatMessage(messages.deletemedia)}</span>
           </ConfirmButton>
         ) : (
           <ConfirmButton

@@ -110,6 +110,7 @@
   "components.Discover.CleanupSlider.snoozeFailed": "Failed to snooze.",
   "components.Discover.CleanupSlider.deleteSuccess": "Media deleted.",
   "components.Discover.CleanupSlider.deleteFailed": "Failed to delete media.",
+  "components.Discover.CleanupSlider.deletemedia": "Delete",
   "components.Discover.CleanupSlider.deleteConfirm": "Delete?",
   "components.Discover.CleanupSlider.canWeDelete": "Still watching?",
   "components.Discover.CleanupSlider.yesDelete": "Done",
