@@ -74,8 +74,8 @@ cleanupRoutes.get('/', async (_req, res, next) => {
       .createQueryBuilder('request')
       .innerJoinAndSelect('request.media', 'media')
       .innerJoinAndSelect('request.requestedBy', 'user')
-      .where('request.status = :status', {
-        status: MediaRequestStatus.COMPLETED,
+      .where('request.status IN (:...statuses)', {
+        statuses: [MediaRequestStatus.APPROVED, MediaRequestStatus.COMPLETED],
       })
       .andWhere(
         '(media.status = :available OR media.status4k = :available)',
