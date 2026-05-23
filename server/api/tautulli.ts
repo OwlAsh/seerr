@@ -236,6 +236,37 @@ class TautulliAPI {
     }
   }
 
+  public async getShowHistory(
+    showRatingKey: string
+  ): Promise<TautulliHistoryRecord[]> {
+    try {
+      return (
+        await this.axios.get<TautulliHistoryResponse>('/api/v2', {
+          params: {
+            cmd: 'get_history',
+            grouping: 1,
+            grandparent_rating_key: showRatingKey,
+            media_type: 'episode',
+            length: 500,
+          },
+        })
+      ).data.response.data.data;
+    } catch (e) {
+      logger.error(
+        'Something went wrong fetching show history from Tautulli',
+        {
+          label: 'Tautulli API',
+          errorMessage: e.message,
+          showRatingKey,
+        }
+      );
+      throw new Error(
+        `[Tautulli] Failed to fetch show history: ${e.message}`,
+        { cause: e }
+      );
+    }
+  }
+
   public async getSeasonWatchProgress(
     seasonRatingKey: string,
     plexUserId: number

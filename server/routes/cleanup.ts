@@ -254,7 +254,7 @@ async function buildCleanupCandidates(): Promise<CleanupCandidate[]> {
         });
       } else {
         // TV: per-season logic
-        // Get season ratingKeys from Plex
+        // Get season ratingKeys - try Plex first, fall back to Tautulli history
         let plexSeasons: { ratingKey: string; index: number }[] = [];
         try {
           const children = await plexApi.getChildrenMetadata(ratingKey);
@@ -262,11 +262,26 @@ async function buildCleanupCandidates(): Promise<CleanupCandidate[]> {
             .filter((c) => c.type === 'season' && c.index > 0)
             .map((c) => ({ ratingKey: c.ratingKey, index: c.index }));
         } catch {
-          logger.warn('Failed to get Plex seasons for cleanup', {
-            label: 'Cleanup',
-            mediaId: media.id,
-          });
-          continue;
+          // Plex API failed (e.g. TLS issues) - extract season keys from Tautulli history
+          try {
+            const history = await tautulli.getShowHistory(ratingKey);
+
+            const seasonMap = new Map<number, number>();
+            for (const ep of history) {
+              if (ep.parent_rating_key && ep.parent_media_index > 0) {
+                seasonMap.set(ep.parent_media_index, ep.parent_rating_key);
+              }
+            }
+            plexSeasons = Array.from(seasonMap.entries())
+              .map(([index, rk]) => ({ ratingKey: String(rk), index }))
+              .sort((a, b) => a.index - b.index);
+          } catch {
+            logger.warn('Failed to get seasons for cleanup from both Plex and Tautulli', {
+              label: 'Cleanup',
+              mediaId: media.id,
+            });
+            continue;
+          }
         }
 
         for (const plexSeason of plexSeasons) {
@@ -283,7 +298,6 @@ async function buildCleanupCandidates(): Promise<CleanupCandidate[]> {
             const seerrUser = plexIdToUser.get(wu.user_id);
             if (!seerrUser) continue;
 
-            // Use mediaId:seasonNumber as key for per-season responses
             const responseKey = `${media.id}:${seerrUser.id}`;
             const existingResp = responseMap.get(responseKey);
 
