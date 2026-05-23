@@ -236,6 +236,88 @@ class TautulliAPI {
     }
   }
 
+  public async getSeasonWatchProgress(
+    seasonRatingKey: string,
+    plexUserId: number
+  ): Promise<{ uniqueEpisodes: number; lastWatchedAt: number }> {
+    try {
+      const records = (
+        await this.axios.get<TautulliHistoryResponse>('/api/v2', {
+          params: {
+            cmd: 'get_history',
+            grouping: 1,
+            order_column: 'date',
+            order_dir: 'desc',
+            user_id: plexUserId,
+            parent_rating_key: seasonRatingKey,
+            media_type: 'episode',
+            length: 500,
+          },
+        })
+      ).data.response.data.data;
+
+      const uniqueKeys = new Set(records.map((r) => r.rating_key));
+      const lastWatchedAt = records.length > 0 ? records[0].date : 0;
+
+      return { uniqueEpisodes: uniqueKeys.size, lastWatchedAt };
+    } catch (e) {
+      logger.error(
+        'Something went wrong fetching season watch progress from Tautulli',
+        {
+          label: 'Tautulli API',
+          errorMessage: e.message,
+          seasonRatingKey,
+          plexUserId,
+        }
+      );
+      throw new Error(
+        `[Tautulli] Failed to fetch season watch progress: ${e.message}`,
+        { cause: e }
+      );
+    }
+  }
+
+  public async getMovieWatchProgress(
+    ratingKey: string,
+    plexUserId: number
+  ): Promise<{ watched: boolean; lastWatchedAt: number }> {
+    try {
+      const records = (
+        await this.axios.get<TautulliHistoryResponse>('/api/v2', {
+          params: {
+            cmd: 'get_history',
+            grouping: 1,
+            order_column: 'date',
+            order_dir: 'desc',
+            user_id: plexUserId,
+            rating_key: ratingKey,
+            media_type: 'movie',
+            length: 1,
+          },
+        })
+      ).data.response.data.data;
+
+      return {
+        watched: records.length > 0 && records[0].watched_status >= 0.75,
+        lastWatchedAt: records.length > 0 ? records[0].date : 0,
+      };
+    } catch (e) {
+      logger.error(
+        'Something went wrong fetching movie watch progress from Tautulli',
+        {
+          label: 'Tautulli API',
+          errorMessage: e.message,
+          ratingKey,
+          plexUserId,
+        }
+      );
+      throw new Error(
+        `[Tautulli] Failed to fetch movie watch progress: ${e.message}`,
+        { cause: e }
+      );
+    }
+  }
+
   public async getUserWatchHistory(
     user: User
   ): Promise<TautulliHistoryRecord[]> {

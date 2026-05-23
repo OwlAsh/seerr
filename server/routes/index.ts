@@ -154,7 +154,7 @@ router.use('/discover', isAuthenticated(), discoverRoutes);
 router.use('/request', isAuthenticated(), requestRoutes);
 router.use('/watchlist', isAuthenticated(), watchlistRoutes);
 router.use('/blocklist', isAuthenticated(), blocklistRoutes);
-router.use('/cleanup', isAuthenticated(Permission.MANAGE_REQUESTS), cleanupRoutes);
+router.use('/cleanup', isAuthenticated(), cleanupRoutes);
 router.use(
   '/blacklist',
   isAuthenticated(),
