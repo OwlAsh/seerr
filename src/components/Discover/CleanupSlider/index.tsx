@@ -150,7 +150,7 @@ const UserCleanupCard = ({
   );
 };
 
-// Card for admins - shows per-user status breakdown
+// Card for admins - shows per-user status breakdown + own consent if pending
 const AdminCleanupCard = ({
   item,
   onAction,
@@ -159,18 +159,54 @@ const AdminCleanupCard = ({
   onAction: () => void;
 }) => {
   const intl = useIntl();
-  const { addToast } = useToasts();
+  const { user } = useUser();
+  const { addToast: toast } = useToasts();
 
-  const handleDelete = async () => {
+  const myStatus = item.users.find((u) => u.id === user?.id);
+  const iAmPending = myStatus?.status === 'pending';
+
+  const handleConsent = async () => {
     try {
-      await axios.delete(`/api/v1/cleanup/${item.mediaId}`);
-      addToast(intl.formatMessage(messages.deleteSuccess), {
+      await axios.post(`/api/v1/cleanup/${item.mediaId}/consent`);
+      toast(intl.formatMessage(messages.consentSuccess), {
         appearance: 'success',
         autoDismiss: true,
       });
       onAction();
     } catch {
-      addToast(intl.formatMessage(messages.deleteFailed), {
+      toast(intl.formatMessage(messages.consentFailed), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
+  const handleSnooze = async () => {
+    try {
+      await axios.post(`/api/v1/cleanup/${item.mediaId}/snooze`);
+      toast(intl.formatMessage(messages.snoozeSuccess), {
+        appearance: 'success',
+        autoDismiss: true,
+      });
+      onAction();
+    } catch {
+      toast(intl.formatMessage(messages.snoozeFailed), {
+        appearance: 'error',
+        autoDismiss: true,
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`/api/v1/cleanup/${item.mediaId}`);
+      toast(intl.formatMessage(messages.deleteSuccess), {
+        appearance: 'success',
+        autoDismiss: true,
+      });
+      onAction();
+    } catch {
+      toast(intl.formatMessage(messages.deleteFailed), {
         appearance: 'error',
         autoDismiss: true,
       });
@@ -208,7 +244,29 @@ const AdminCleanupCard = ({
         ))}
       </div>
 
-      <div className="mt-2">
+      {/* If admin is pending, show their own consent/snooze buttons */}
+      {iAmPending && (
+        <div className="mt-2 flex gap-1.5 border-t border-gray-700 pt-2">
+          <Button
+            buttonType="success"
+            className="flex-1 !py-1 !text-xs"
+            onClick={handleConsent}
+          >
+            <CheckCircleIcon className="mr-1 h-3.5 w-3.5" />
+            <span>{intl.formatMessage(messages.yesDelete)}</span>
+          </Button>
+          <Button
+            buttonType="default"
+            className="flex-1 !py-1 !text-xs"
+            onClick={handleSnooze}
+          >
+            <ClockIcon className="mr-1 h-3.5 w-3.5" />
+            <span>{intl.formatMessage(messages.keepWatching)}</span>
+          </Button>
+        </div>
+      )}
+
+      <div className={iAmPending ? 'mt-1.5' : 'mt-2'}>
         {item.readyToDelete ? (
           <ConfirmButton
             onClick={handleDelete}
