@@ -1,5 +1,4 @@
 import Button from '@app/components/Common/Button';
-import CachedImage from '@app/components/Common/CachedImage';
 import ConfirmButton from '@app/components/Common/ConfirmButton';
 import Slider from '@app/components/Slider';
 import useToasts from '@app/hooks/useToasts';
@@ -9,9 +8,11 @@ import defineMessages from '@app/utils/defineMessages';
 import {
   CheckCircleIcon,
   ClockIcon,
+  FilmIcon,
   PauseCircleIcon,
   QuestionMarkCircleIcon,
   TrashIcon,
+  TvIcon,
 } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
@@ -110,47 +111,40 @@ const UserCleanupCard = ({
   };
 
   return (
-    <div className="relative flex w-36 flex-col overflow-hidden rounded-xl bg-gray-800 shadow-md ring-1 ring-gray-700 sm:w-44">
-      <div className="relative aspect-[2/3] w-full">
-        <CachedImage
-          type="tmdb"
-          className="absolute inset-0 h-full w-full"
-          alt={item.title}
-          src={
-            item.posterPath
-              ? `https://image.tmdb.org/t/p/w300_and_h450_face${item.posterPath}`
-              : `/images/seerr_poster_not_found_logo_top.png`
-          }
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          fill
-        />
-      </div>
-      <div className="flex flex-1 flex-col p-2">
-        <h3 className="truncate text-sm font-bold text-gray-100" title={item.title}>
-          {item.title}
-        </h3>
-        <p className="text-xs text-gray-400">{item.year}</p>
-        <p className="mt-1 text-xs text-yellow-400">
-          {intl.formatMessage(messages.canWeDelete)}
-        </p>
-        <div className="mt-2 flex gap-1">
-          <Button
-            buttonType="success"
-            className="flex-1 !px-1 !py-1 !text-xs"
-            onClick={handleConsent}
-          >
-            <CheckCircleIcon className="mr-0.5 h-3 w-3" />
-            <span>{intl.formatMessage(messages.yesDelete)}</span>
-          </Button>
-          <Button
-            buttonType="default"
-            className="flex-1 !px-1 !py-1 !text-xs"
-            onClick={handleSnooze}
-          >
-            <ClockIcon className="mr-0.5 h-3 w-3" />
-            <span>{intl.formatMessage(messages.keepWatching)}</span>
-          </Button>
+    <div className="flex w-56 flex-col rounded-lg bg-gray-800 p-3 ring-1 ring-gray-700 sm:w-64">
+      <div className="flex items-start gap-2">
+        {item.mediaType === 'movie' ? (
+          <FilmIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
+        ) : (
+          <TvIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-400" />
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-gray-100" title={item.title}>
+            {item.title}
+          </h3>
+          <p className="text-xs text-gray-500">{item.year}</p>
         </div>
+      </div>
+      <p className="mt-2 text-xs text-yellow-400">
+        {intl.formatMessage(messages.canWeDelete)}
+      </p>
+      <div className="mt-2 flex gap-1.5">
+        <Button
+          buttonType="success"
+          className="flex-1 !py-1 !text-xs"
+          onClick={handleConsent}
+        >
+          <CheckCircleIcon className="mr-1 h-3.5 w-3.5" />
+          <span>{intl.formatMessage(messages.yesDelete)}</span>
+        </Button>
+        <Button
+          buttonType="default"
+          className="flex-1 !py-1 !text-xs"
+          onClick={handleSnooze}
+        >
+          <ClockIcon className="mr-1 h-3.5 w-3.5" />
+          <span>{intl.formatMessage(messages.keepWatching)}</span>
+        </Button>
       </div>
     </div>
   );
@@ -184,63 +178,56 @@ const AdminCleanupCard = ({
   };
 
   return (
-    <div className="relative flex w-44 flex-col overflow-hidden rounded-xl bg-gray-800 shadow-md ring-1 ring-gray-700 sm:w-52">
-      <div className="relative aspect-[2/3] w-full">
-        <CachedImage
-          type="tmdb"
-          className="absolute inset-0 h-full w-full"
-          alt={item.title}
-          src={
-            item.posterPath
-              ? `https://image.tmdb.org/t/p/w300_and_h450_face${item.posterPath}`
-              : `/images/seerr_poster_not_found_logo_top.png`
-          }
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          fill
-        />
+    <div className="flex w-56 flex-col rounded-lg bg-gray-800 p-3 ring-1 ring-gray-700 sm:w-64">
+      <div className="flex items-start gap-2">
+        {item.mediaType === 'movie' ? (
+          <FilmIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-400" />
+        ) : (
+          <TvIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-purple-400" />
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-gray-100" title={item.title}>
+            {item.title}
+          </h3>
+          <p className="text-xs text-gray-500">{item.year}</p>
+        </div>
         {item.readyToDelete && (
-          <div className="absolute right-2 top-2 rounded-full bg-green-600/90 px-2 py-0.5 text-xs font-medium text-white">
+          <span className="flex-shrink-0 rounded-full bg-green-600/90 px-2 py-0.5 text-xs font-medium text-white">
             {intl.formatMessage(messages.readyToDelete)}
-          </div>
+          </span>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-2">
-        <h3 className="truncate text-sm font-bold text-gray-100" title={item.title}>
-          {item.title}
-        </h3>
-        <p className="text-xs text-gray-400">{item.year}</p>
 
-        {/* User status list */}
-        <div className="mt-1.5 space-y-0.5">
-          {item.users.map((u) => (
-            <div key={u.id} className="flex items-center gap-1 text-xs text-gray-400">
-              {statusIcon[u.status]}
-              <span className="truncate">{u.displayName}</span>
-            </div>
-          ))}
-        </div>
+      {/* User status list */}
+      <div className="mt-2 space-y-0.5">
+        {item.users.map((u) => (
+          <div key={u.id} className="flex items-center gap-1.5 text-xs text-gray-400">
+            {statusIcon[u.status]}
+            <span className="truncate">{u.displayName}</span>
+          </div>
+        ))}
+      </div>
 
-        <div className="mt-2 flex gap-1">
-          {item.readyToDelete ? (
-            <ConfirmButton
-              onClick={handleDelete}
-              confirmText={intl.formatMessage(messages.deleteConfirm)}
-              className="flex-1 !px-1 !py-1 !text-xs"
-            >
-              <TrashIcon className="mr-0.5 h-3 w-3" />
-              <span>{intl.formatMessage(messages.yesDelete)}</span>
-            </ConfirmButton>
-          ) : (
-            <ConfirmButton
-              onClick={handleDelete}
-              confirmText={intl.formatMessage(globalMessages.areyousure)}
-              className="flex-1 !px-1 !py-1 !text-xs"
-            >
-              <TrashIcon className="mr-0.5 h-3 w-3" />
-              <span>{intl.formatMessage(messages.forceDelete)}</span>
-            </ConfirmButton>
-          )}
-        </div>
+      <div className="mt-2">
+        {item.readyToDelete ? (
+          <ConfirmButton
+            onClick={handleDelete}
+            confirmText={intl.formatMessage(messages.deleteConfirm)}
+            className="w-full !py-1 !text-xs"
+          >
+            <TrashIcon className="mr-1 h-3.5 w-3.5" />
+            <span>{intl.formatMessage(messages.yesDelete)}</span>
+          </ConfirmButton>
+        ) : (
+          <ConfirmButton
+            onClick={handleDelete}
+            confirmText={intl.formatMessage(globalMessages.areyousure)}
+            className="w-full !py-1 !text-xs"
+          >
+            <TrashIcon className="mr-1 h-3.5 w-3.5" />
+            <span>{intl.formatMessage(messages.forceDelete)}</span>
+          </ConfirmButton>
+        )}
       </div>
     </div>
   );
@@ -253,8 +240,33 @@ const CleanupSlider = () => {
     '/api/v1/cleanup'
   );
 
-  if (!data || data.results.length === 0) {
+  if (data && data.results.length === 0) {
     return null;
+  }
+
+  if (!data) {
+    // Show placeholder while loading to prevent layout shift
+    return (
+      <>
+        <div className="slider-header">
+          <div className="slider-title">
+            <span>{intl.formatMessage(messages.mediacleanup)}</span>
+          </div>
+        </div>
+        <div className="flex gap-4 overflow-hidden pb-4">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className="w-56 animate-pulse rounded-lg bg-gray-800 p-3 ring-1 ring-gray-700 sm:w-64"
+            >
+              <div className="h-4 w-3/4 rounded bg-gray-700" />
+              <div className="mt-2 h-3 w-1/2 rounded bg-gray-700" />
+              <div className="mt-3 h-8 rounded bg-gray-700" />
+            </div>
+          ))}
+        </div>
+      </>
+    );
   }
 
   const isAdmin = hasPermission(Permission.MANAGE_REQUESTS);
