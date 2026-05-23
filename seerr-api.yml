@@ -4568,6 +4568,77 @@ paths:
                       restricted:
                         type: boolean
                         example: false
+  /cleanup:
+    get:
+      summary: Get media cleanup candidates
+      description: Returns media items that have been watched and may be deleted. Normal users see their pending items, admins see all with per-user status.
+      tags:
+        - cleanup
+      responses:
+        '200':
+          description: Cleanup candidates returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+  /cleanup/{mediaId}/consent:
+    post:
+      summary: Consent to media deletion
+      description: Mark that the current user agrees this media can be deleted.
+      tags:
+        - cleanup
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Consent recorded
+          content:
+            application/json:
+              schema:
+                type: object
+  /cleanup/{mediaId}/snooze:
+    post:
+      summary: Snooze a cleanup item
+      description: Hide a cleanup item for 30 days for the current user.
+      tags:
+        - cleanup
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Item snoozed
+          content:
+            application/json:
+              schema:
+                type: object
+  /cleanup/{mediaId}:
+    delete:
+      summary: Force delete media (admin only)
+      description: Delete media files from Radarr/Sonarr and remove from database.
+      tags:
+        - cleanup
+      parameters:
+        - in: path
+          name: mediaId
+          required: true
+          schema:
+            type: number
+      responses:
+        '204':
+          description: Media deleted
   /blocklist:
     get:
       summary: Returns blocklisted items
