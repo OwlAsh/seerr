@@ -16,9 +16,43 @@ import { User } from '@server/entity/User';
 import { Permission } from '@server/lib/permissions';
 import { getSettings } from '@server/lib/settings';
 import logger from '@server/logger';
+import dataSource from '@server/datasource';
 import { Router } from 'express';
 
 const cleanupRoutes = Router();
+
+// Ensure the cleanup response table exists (auto-create if missing)
+let tableReady = false;
+async function ensureTable(): Promise<void> {
+  if (tableReady) return;
+  try {
+    const qr = dataSource.createQueryRunner();
+    const hasTable = await qr.hasTable('media_cleanup_response');
+    if (!hasTable) {
+      await qr.query(`
+        CREATE TABLE "media_cleanup_response" (
+          "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+          "mediaId" integer NOT NULL,
+          "userId" integer NOT NULL,
+          "response" varchar NOT NULL,
+          "respondedAt" datetime NOT NULL DEFAULT (datetime('now')),
+          "snoozeUntil" datetime,
+          CONSTRAINT "UQ_cleanup_media_user" UNIQUE ("mediaId", "userId")
+        )
+      `);
+      await qr.query(`CREATE INDEX "IDX_cleanup_mediaId" ON "media_cleanup_response" ("mediaId")`);
+      await qr.query(`CREATE INDEX "IDX_cleanup_userId" ON "media_cleanup_response" ("userId")`);
+      logger.info('Created media_cleanup_response table', { label: 'Cleanup' });
+    }
+    await qr.release();
+    tableReady = true;
+  } catch (e) {
+    logger.warn('Failed to ensure cleanup table', {
+      label: 'Cleanup',
+      errorMessage: e.message,
+    });
+  }
+}
 
 const THIRTY_DAYS_SEC = 30 * 24 * 60 * 60;
 const COMPLETION_THRESHOLD = 0.8;
@@ -51,6 +85,8 @@ interface CleanupCandidate {
 }
 
 async function buildCleanupCandidates(): Promise<CleanupCandidate[]> {
+  await ensureTable();
+
   const settings = getSettings();
   const tautulliSettings = settings.tautulli;
 
